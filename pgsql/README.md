@@ -23,8 +23,9 @@ CREATE ROLE shin02_owners NOLOGIN;
 -- 2. 建立登入用帳號 pguser，密碼 pgUser567
 CREATE USER pguser WITH PASSWORD 'pgUser567';
 
--- 3. 建立資料庫，OWNER 指定為群組
-CREATE DATABASE shin02 OWNER shin02_owners;
+-- 3. OWNER 指定為群組
+-- CREATE DATABASE shin02 OWNER shin02_owners;
+ALTER DATABASE shin02 OWNER TO shin02_owners;
 
 -- 4. 把 pguser 加入群組（之後要新增成員，重複此步驟即可）
 GRANT shin02_owners TO pguser;
