@@ -24,11 +24,14 @@ CREATE ROLE shin02_owners NOLOGIN;
 CREATE USER pguser WITH PASSWORD 'pgUser567';
 
 -- 3. OWNER 指定為群組
--- CREATE DATABASE shin02 OWNER shin02_owners;
-ALTER DATABASE shin02 OWNER TO shin02_owners;
+CREATE DATABASE shin02 OWNER shin02_owners;
 
 -- 4. 把 pguser 加入群組（之後要新增成員，重複此步驟即可）
 GRANT shin02_owners TO pguser;
+
+-- 5. 使用 pguser 登入，匯入 SQL 建立資料表
+psql -h localhost -U pguser -d shin02
+\i data/shin02-pgsql.sql
 ```
 
 > - PostgreSQL 16+ 預設 role 為 `INHERIT`，加入群組後會自動取得權限；若 role 為 `NOINHERIT`，需先 `SET ROLE shin02_owners` 才生效。
