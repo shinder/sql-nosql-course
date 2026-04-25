@@ -1,7 +1,7 @@
 """PostgreSQL 連線基本範例。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.connect
+    uv run python -m pgsql.try_connect
 """
 
 import psycopg

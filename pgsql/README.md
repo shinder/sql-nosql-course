@@ -36,19 +36,51 @@ GRANT shin02_owners TO pguser;
 
 ## 驗證連線
 
+用 `psql` 直接驗證：
+
 ```bash
 psql -h localhost -U pguser -d shin02
 ```
 
-或透過本專案範例：
+或先複製 `.env.example` 為 `.env`，填入下列三項，再用本專案範例：
+
+```
+PGUSER=pguser
+PGPASSWORD=pgUser567
+PGDATABASE=shin02
+```
+
+## 範例程式
+
+所有指令從專案根目錄執行。
+
+### `try_connect.py` — 單次連線測試
+
+建立一條連線、查詢 `SELECT version()`、關閉。用來確認 `.env` 與帳號權限設定無誤。
 
 ```bash
-# 先複製 .env.example 為 .env，填入：
-# PGUSER=pguser
-# PGPASSWORD=pgUser567
-# PGDATABASE=shin02
-uv run python -m pgsql.connect
+uv run python -m pgsql.try_connect
 ```
+
+預期輸出：
+
+```
+PostgreSQL 版本： PostgreSQL 16.x ...
+```
+
+### `try_pool.py` — 連線池測試
+
+驗證 `pgsql.pool.get_pool()` 單例：
+
+1. 從池借出單一連線，印出 `current_database` / `current_user`
+2. 開 8 個 thread 搶 5 條連線上限（每個查詢 sleep 0.5s），觀察排隊行為
+3. 印出 `pool.get_stats()` 統計
+
+```bash
+uv run python -m pgsql.try_pool
+```
+
+預期約 1.0s 完成（兩批排隊：5 + 3）。可調整 `main()` 內的 `min_size` / `max_size` 觀察差異。
 
 ## 移除（如需重來）
 
