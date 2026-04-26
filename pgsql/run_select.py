@@ -1,4 +1,4 @@
-"""讀取 address_book 表，依 id 由大到小取前三筆。
+"""讀取 address_book 表，依 id 由大到小取前五筆。
 
 執行方式（從專案根目錄）：
     uv run python -m pgsql.run_select
@@ -11,7 +11,7 @@ from pgsql.config import get_conninfo
 
 
 def main() -> None:
-    sql = "SELECT * FROM public.address_book ORDER BY ab_id DESC LIMIT 3;"
+    sql = "SELECT * FROM public.address_book ORDER BY ab_id DESC LIMIT 5;"
 
     with psycopg.connect(get_conninfo(), row_factory=dict_row) as conn:
         with conn.cursor() as cur:

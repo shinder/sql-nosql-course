@@ -85,6 +85,32 @@ uv run python -m pgsql.try_pool
 
 預期約 1.0s 完成（兩批排隊：5 + 3）。可調整 `main()` 內的 `min_size` / `max_size` 觀察差異。
 
+### `run_select.py` — SELECT 查詢範例
+
+讀取 `public.address_book` 表，依 `ab_id` 由大到小取前 5 筆並印出每個欄位。
+使用 `psycopg.rows.dict_row` 讓 `fetchall()` 直接回傳 dict。
+
+```bash
+uv run python -m pgsql.run_select
+```
+
+### `run_insert.py` — INSERT 批次新增範例
+
+用 `Faker('zh_TW')` 產生隨機資料，透過 `cursor.executemany(..., returning=True)`
+批次寫入 `public.address_book`，並印出新增的 `ab_id` 範圍與前 3 筆樣本。
+
+```bash
+uv run python -m pgsql.run_insert         # 預設 5 筆
+uv run python -m pgsql.run_insert 50      # 指定筆數（上限 100）
+```
+
+欄位產生方式：
+
+- `name` / `email` / `birthday`：`fake.name()` / `fake.email()` / `fake.date_of_birth()`
+- `mobile`：自製 `09` + 8 位亂數，貼近 seed 資料的 `0918xxxxxxx` 風格
+- `address`：從 22 個直轄市 / 縣市清單隨機挑一個（與 seed 資料一致）
+- `created_at`：`datetime.now()`
+
 ## 移除（如需重來）
 
 ```sql
