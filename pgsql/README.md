@@ -111,6 +111,28 @@ uv run python -m pgsql.run_insert 50      # 指定筆數（上限 100）
 - `address`：從 22 個直轄市 / 縣市清單隨機挑一個（與 seed 資料一致）
 - `created_at`：`datetime.now()`
 
+### `run_update.py` — UPDATE 範例
+
+依命令列傳入的 `ab_id` 修改該筆資料的 `name` 欄位，
+透過 `RETURNING ab_id, name, email` 印出更新後的結果（email 用來協助辨識是否改到對的人）。
+
+```bash
+uv run python -m pgsql.run_update 123 王小明     # 把 ab_id=123 的 name 改成「王小明」
+```
+
+兩個參數都必填，沒給會直接結束、印出用法。
+
+### `run_delete.py` — DELETE 範例
+
+依命令列傳入的 `ab_id` 刪除一筆資料，並用 `RETURNING *` 印出剛被刪掉的整列內容。
+找不到符合的列時會明確提示並以 exit code 1 結束。
+
+```bash
+uv run python -m pgsql.run_delete 123     # 刪除 ab_id=123
+```
+
+刪除是破壞性操作，所以**不設預設值**：沒傳參數會直接結束、印出用法。
+
 ## 移除（如需重來）
 
 ```sql
