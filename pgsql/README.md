@@ -85,6 +85,21 @@ uv run python -m pgsql.try_pool
 
 預期約 1.0s 完成（兩批排隊：5 + 3）。可調整 `main()` 內的 `min_size` / `max_size` 觀察差異。
 
+### `try_transaction.py` — 交易（atomicity）示範
+
+挑出 `address_book` 最新兩筆做兩次 `UPDATE`，演示交易的原子性：
+
+- **場景 A**：第一個 UPDATE 跑完後故意拋例外 → 離開 `with psycopg.connect(...)` 區塊時自動 rollback → 重新查詢時兩筆都「沒變」
+- **場景 B**：兩個 UPDATE 都成功 → 區塊正常結束自動 commit → 兩筆都被改了
+- 最後還原成原始資料，腳本可重複執行
+
+```bash
+uv run python -m pgsql.try_transaction
+```
+
+關鍵觀念：psycopg 預設 `autocommit=False`，`with psycopg.connect(...)` 區塊正常結束會 commit、
+拋例外會 rollback；想明確控制就改用 `try / except / finally` 自己呼叫 `conn.commit()` / `conn.rollback()`。
+
 ### `run_select.py` — SELECT 查詢範例
 
 讀取 `public.address_book` 表，依 `ab_id` 由大到小取前 5 筆並印出每個欄位。
@@ -121,6 +136,21 @@ uv run python -m pgsql.run_update 123 王小明     # 把 ab_id=123 的 name 改
 ```
 
 兩個參數都必填，沒給會直接結束、印出用法。
+
+### `run_join.py` — JOIN 範例
+
+用 `members` / `orders` / `order_details` / `products` 四張表示範三種 JOIN：
+
+1. **INNER JOIN**（orders × members）：列出每筆訂單與下單會員
+2. **LEFT JOIN**（members × orders + GROUP BY）：列出所有會員與其訂單數，沒下單的會員會以 `order_count=0` 出現
+3. **多表 JOIN**（4 張表）：訂單明細查詢，含會員、書名、小計
+
+```bash
+uv run python -m pgsql.run_join
+```
+
+seed 資料的會員「瑪麗亞」沒下過任何訂單，正好用來凸顯 INNER 與 LEFT 的差別 ──
+INNER 看不到她、LEFT 才看得到。
 
 ### `run_delete.py` — DELETE 範例
 
