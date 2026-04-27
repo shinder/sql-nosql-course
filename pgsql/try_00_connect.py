@@ -1,7 +1,7 @@
 """PostgreSQL 連線基本範例。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.try_connect
+    uv run python -m pgsql.try_00_connect
 """
 
 # psycopg 是 Python 連 PostgreSQL 的官方驅動（v3 版本，注意不是舊的 psycopg2）。

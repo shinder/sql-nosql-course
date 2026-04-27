@@ -1,7 +1,7 @@
 """依 ab_id 刪除 public.address_book 的一筆資料。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.run_delete 123     # 刪除 ab_id=123 的那筆
+    uv run python -m pgsql.try_04_delete 123     # 刪除 ab_id=123 的那筆
 """
 
 import sys
@@ -15,7 +15,7 @@ from pgsql.config import get_conninfo
 def main() -> None:
     # 刪除是「破壞性操作」，沒給 id 直接結束比較安全（不要設預設值）。
     if len(sys.argv) < 2:
-        sys.exit("用法：uv run python -m pgsql.run_delete <ab_id>")
+        sys.exit("用法：uv run python -m pgsql.try_04_delete <ab_id>")
 
     # 把命令列傳進來的字串轉成整數；轉不過去就讓 ValueError 噴出來給使用者看。
     # （ab_id 在資料庫是 SERIAL → INTEGER，傳字串會被 PostgreSQL 拒絕。）

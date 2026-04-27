@@ -1,7 +1,7 @@
 """連線池測試程式。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.try_pool
+    uv run python -m pgsql.try_07_pool
 
 驗證項目：
     1. 從池中借出/歸還連線

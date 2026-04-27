@@ -55,14 +55,14 @@ PGDATABASE=shin02
 
 ## 範例程式
 
-所有指令從專案根目錄執行。
+所有指令從專案根目錄執行。檔名數字代表「建議學習順序」，從基本到進階：
 
-### `try_connect.py` — 單次連線測試
+### `try_00_connect.py` — 單次連線測試
 
 建立一條連線、查詢 `SELECT version()`、關閉。用來確認 `.env` 與帳號權限設定無誤。
 
 ```bash
-uv run python -m pgsql.try_connect
+uv run python -m pgsql.try_00_connect
 ```
 
 預期輸出：
@@ -71,52 +71,23 @@ uv run python -m pgsql.try_connect
 PostgreSQL 版本： PostgreSQL 16.x ...
 ```
 
-### `try_pool.py` — 連線池測試
-
-驗證 `pgsql.pool.get_pool()` 單例：
-
-1. 從池借出單一連線，印出 `current_database` / `current_user`
-2. 開 8 個 thread 搶 5 條連線上限（每個查詢 sleep 0.5s），觀察排隊行為
-3. 印出 `pool.get_stats()` 統計
-
-```bash
-uv run python -m pgsql.try_pool
-```
-
-預期約 1.0s 完成（兩批排隊：5 + 3）。可調整 `main()` 內的 `min_size` / `max_size` 觀察差異。
-
-### `try_transaction.py` — 交易（atomicity）示範
-
-挑出 `address_book` 最新兩筆做兩次 `UPDATE`，演示交易的原子性：
-
-- **場景 A**：第一個 UPDATE 跑完後故意拋例外 → 離開 `with psycopg.connect(...)` 區塊時自動 rollback → 重新查詢時兩筆都「沒變」
-- **場景 B**：兩個 UPDATE 都成功 → 區塊正常結束自動 commit → 兩筆都被改了
-- 最後還原成原始資料，腳本可重複執行
-
-```bash
-uv run python -m pgsql.try_transaction
-```
-
-關鍵觀念：psycopg 預設 `autocommit=False`，`with psycopg.connect(...)` 區塊正常結束會 commit、
-拋例外會 rollback；想明確控制就改用 `try / except / finally` 自己呼叫 `conn.commit()` / `conn.rollback()`。
-
-### `run_select.py` — SELECT 查詢範例
+### `try_01_select.py` — SELECT 查詢範例
 
 讀取 `public.address_book` 表，依 `ab_id` 由大到小取前 5 筆並印出每個欄位。
 使用 `psycopg.rows.dict_row` 讓 `fetchall()` 直接回傳 dict。
 
 ```bash
-uv run python -m pgsql.run_select
+uv run python -m pgsql.try_01_select
 ```
 
-### `run_insert.py` — INSERT 批次新增範例
+### `try_02_insert.py` — INSERT 批次新增範例
 
 用 `Faker('zh_TW')` 產生隨機資料，透過 `cursor.executemany(..., returning=True)`
 批次寫入 `public.address_book`，並印出新增的 `ab_id` 範圍與前 3 筆樣本。
 
 ```bash
-uv run python -m pgsql.run_insert         # 預設 5 筆
-uv run python -m pgsql.run_insert 50      # 指定筆數（上限 100）
+uv run python -m pgsql.try_02_insert         # 預設 5 筆
+uv run python -m pgsql.try_02_insert 50      # 指定筆數（上限 100）
 ```
 
 欄位產生方式：
@@ -126,18 +97,29 @@ uv run python -m pgsql.run_insert 50      # 指定筆數（上限 100）
 - `address`：從 22 個直轄市 / 縣市清單隨機挑一個（與 seed 資料一致）
 - `created_at`：`datetime.now()`
 
-### `run_update.py` — UPDATE 範例
+### `try_03_update.py` — UPDATE 範例
 
 依命令列傳入的 `ab_id` 修改該筆資料的 `name` 欄位，
 透過 `RETURNING ab_id, name, email` 印出更新後的結果（email 用來協助辨識是否改到對的人）。
 
 ```bash
-uv run python -m pgsql.run_update 123 王小明     # 把 ab_id=123 的 name 改成「王小明」
+uv run python -m pgsql.try_03_update 123 王小明     # 把 ab_id=123 的 name 改成「王小明」
 ```
 
 兩個參數都必填，沒給會直接結束、印出用法。
 
-### `run_join.py` — JOIN 範例
+### `try_04_delete.py` — DELETE 範例
+
+依命令列傳入的 `ab_id` 刪除一筆資料，並用 `RETURNING *` 印出剛被刪掉的整列內容。
+找不到符合的列時會明確提示並以 exit code 1 結束。
+
+```bash
+uv run python -m pgsql.try_04_delete 123     # 刪除 ab_id=123
+```
+
+刪除是破壞性操作，所以**不設預設值**：沒傳參數會直接結束、印出用法。
+
+### `try_05_join.py` — JOIN 範例
 
 用 `members` / `orders` / `order_details` / `products` 四張表示範三種 JOIN：
 
@@ -146,22 +128,40 @@ uv run python -m pgsql.run_update 123 王小明     # 把 ab_id=123 的 name 改
 3. **多表 JOIN**（4 張表）：訂單明細查詢，含會員、書名、小計
 
 ```bash
-uv run python -m pgsql.run_join
+uv run python -m pgsql.try_05_join
 ```
 
 seed 資料的會員「瑪麗亞」沒下過任何訂單，正好用來凸顯 INNER 與 LEFT 的差別 ──
 INNER 看不到她、LEFT 才看得到。
 
-### `run_delete.py` — DELETE 範例
+### `try_06_transaction.py` — 交易（atomicity）示範
 
-依命令列傳入的 `ab_id` 刪除一筆資料，並用 `RETURNING *` 印出剛被刪掉的整列內容。
-找不到符合的列時會明確提示並以 exit code 1 結束。
+挑出 `address_book` 最新兩筆做兩次 `UPDATE`，演示交易的原子性：
+
+- **場景 A**：第一個 UPDATE 跑完後故意拋例外 → 離開 `with psycopg.connect(...)` 區塊時自動 rollback → 重新查詢時兩筆都「沒變」
+- **場景 B**：兩個 UPDATE 都成功 → 區塊正常結束自動 commit → 兩筆都被改了
+- 最後還原成原始資料，腳本可重複執行
 
 ```bash
-uv run python -m pgsql.run_delete 123     # 刪除 ab_id=123
+uv run python -m pgsql.try_06_transaction
 ```
 
-刪除是破壞性操作，所以**不設預設值**：沒傳參數會直接結束、印出用法。
+關鍵觀念：psycopg 預設 `autocommit=False`，`with psycopg.connect(...)` 區塊正常結束會 commit、
+拋例外會 rollback；想明確控制就改用 `try / except / finally` 自己呼叫 `conn.commit()` / `conn.rollback()`。
+
+### `try_07_pool.py` — 連線池測試
+
+驗證 `pgsql.pool.get_pool()` 單例：
+
+1. 從池借出單一連線，印出 `current_database` / `current_user`
+2. 開 8 個 thread 搶 5 條連線上限（每個查詢 sleep 0.5s），觀察排隊行為
+3. 印出 `pool.get_stats()` 統計
+
+```bash
+uv run python -m pgsql.try_07_pool
+```
+
+預期約 1.0s 完成（兩批排隊：5 + 3）。可調整 `main()` 內的 `min_size` / `max_size` 觀察差異。
 
 ## 移除（如需重來）
 

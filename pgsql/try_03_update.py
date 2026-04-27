@@ -1,7 +1,7 @@
 """依 ab_id 修改 public.address_book 的 name 欄位。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.run_update 123 王小明     # 把 ab_id=123 的 name 改成「王小明」
+    uv run python -m pgsql.try_03_update 123 王小明     # 把 ab_id=123 的 name 改成「王小明」
 """
 
 import sys
@@ -14,7 +14,7 @@ from pgsql.config import get_conninfo
 def main() -> None:
     # UPDATE 也是破壞性操作（會覆蓋舊資料），所以兩個參數都要明確提供，不設預設值。
     if len(sys.argv) < 3:
-        sys.exit("用法：uv run python -m pgsql.run_update <ab_id> <new_name>")
+        sys.exit("用法：uv run python -m pgsql.try_03_update <ab_id> <new_name>")
 
     try:
         ab_id = int(sys.argv[1])

@@ -15,9 +15,11 @@ PostgreSQL（未來預計加入 NoSQL）連線練習專案。使用 `uv` 管理 
 uv sync
 
 # 執行範例程式（一律以模組方式執行，因為 pgsql/ 內檔案會 import pgsql.config 等）
-uv run python -m pgsql.try_connect    # 單次連線測試
-uv run python -m pgsql.try_pool       # 連線池併發測試
-uv run python -m pgsql.run_select     # 範例 SELECT 查詢
+# 檔名數字代表建議學習順序：00 連線 → 01 SELECT → 02 INSERT → ... → 07 連線池
+uv run python -m pgsql.try_00_connect      # 單次連線測試
+uv run python -m pgsql.try_01_select       # SELECT 查詢
+uv run python -m pgsql.try_07_pool         # 連線池併發測試
+# 完整清單見 pgsql/README.md
 
 # 型別檢查（pyproject.toml 已設定 [tool.ty.environment]）
 uv run ty check
@@ -55,4 +57,5 @@ uv run ty check
 
 - 文件、註解、commit message 一律使用正體中文（沿用全域偏好）。
 - `pgsql/` 內所有可執行檔以 `python -m pgsql.<name>` 方式啟動，import 路徑要寫成 `from pgsql.config import ...`，而不是相對 import。
+- 教學用 demo 檔名格式為 `try_NN_<topic>.py`（如 `try_02_insert.py`）。`NN` 是教學順序編號，新增 demo 時延續這個慣例。函式庫檔（`config.py` / `pool.py` / `__init__.py`）不加數字前綴，因為會被其他檔 import。
 - `data/shin02-pgsql.sql` 是從 MariaDB / phpMyAdmin dump 轉換而來，檔頭註解列出了所有改寫規則，未來若再從 MySQL/MariaDB 匯入新資料表時請依相同規則轉換。

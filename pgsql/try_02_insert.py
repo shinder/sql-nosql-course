@@ -1,8 +1,8 @@
 """產生隨機資料並批次寫入 public.address_book。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.run_insert         # 預設新增 5 筆
-    uv run python -m pgsql.run_insert 50      # 指定筆數（上限 100）
+    uv run python -m pgsql.try_02_insert         # 預設新增 5 筆
+    uv run python -m pgsql.try_02_insert 50      # 指定筆數（上限 100）
 """
 
 # random：Python 內建的亂數模組

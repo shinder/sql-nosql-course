@@ -1,7 +1,7 @@
 """示範 INNER JOIN 與 LEFT JOIN 的差別，再加一個多表 JOIN 範例。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.run_join
+    uv run python -m pgsql.try_05_join
 
 用到的表：
     members         會員（member_id 是 PK）

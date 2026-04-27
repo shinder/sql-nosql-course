@@ -1,7 +1,7 @@
 """讀取 address_book 表，依 id 由大到小取前五筆。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.run_select
+    uv run python -m pgsql.try_01_select
 """
 
 import psycopg

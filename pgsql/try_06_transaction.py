@@ -1,7 +1,7 @@
 """示範交易 (transaction) 的原子性：兩個 UPDATE 要嘛都成功、要嘛都不算。
 
 執行方式（從專案根目錄）：
-    uv run python -m pgsql.try_transaction
+    uv run python -m pgsql.try_06_transaction
 
 劇本：
     1. 自動挑出 address_book 最新兩筆當實驗對象
