@@ -32,6 +32,11 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'shin02')\gexec
 
 BEGIN;
 
+-- 確保用 UTF-8 解析此檔（檔案本身是 UTF-8 編碼）
+-- Windows cmd 預設 codepage 為 CP950 (Big5)，psql 啟動後 client_encoding
+-- 也會跟著是 BIG5，讀到中文 INSERT 時會解碼失敗。明確 SET 一次最保險。
+SET client_encoding = 'UTF8';
+
 -- =====================================================
 -- 為了可重複執行，先清除舊資料表（依外鍵相反順序）
 -- =====================================================
