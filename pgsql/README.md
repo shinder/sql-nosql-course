@@ -37,6 +37,22 @@ psql -h localhost -U pguser -d shin02
 > - PostgreSQL 16+ 預設 role 為 `INHERIT`，加入群組後會自動取得權限；若 role 為 `NOINHERIT`，需先 `SET ROLE shin02_owners` 才生效。
 > - 群組成員建立的 table/schema，擁有者預設是建立者本人。若希望物件也由群組共有，建立前先 `SET ROLE shin02_owners`，或事後 `ALTER TABLE ... OWNER TO shin02_owners`。
 
+### Windows 上 `\i` 的路徑寫法
+
+psql 的 `\i` metacommand 在 Windows 上要特別注意兩件事，否則會踩到 `Permission denied` 或編碼錯誤：
+
+1. **路徑用單引號 + 正斜線**
+
+   ```
+   \i 'C:/Users/shin/Documents/sql-nosql-course/data/shin02-pgsql.sql'
+   ```
+
+   - **單引號**：psql 的雙引號 (`"`) 是給 SQL identifier（table / column 名）用的，不是給檔名。
+   - **正斜線 `/`**：反斜線 `\` 是 psql 的 escape 字元，路徑裡的 `\U` `\D` 之類會被誤解。寫成 `\i C:\Users\shin\...` 通常會出 `C:: Permission denied`。
+     正斜線在 Windows libpq 完全合法。
+
+2. **編碼問題**：Windows cmd 預設 codepage 是 CP950 (Big5)，psql 啟動後 `client_encoding` 也跟著變 BIG5，讀含中文的 UTF-8 SQL 檔會炸。本專案的 `data/shin02-pgsql.sql` 在 `BEGIN;` 之後就有一行 `SET client_encoding = 'UTF8';` 預先處理掉這個問題。寫自己的 SQL 檔時記得也加。
+
 ## 驗證連線
 
 用 `psql` 直接驗證：
