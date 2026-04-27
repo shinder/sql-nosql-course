@@ -1,0 +1,3 @@
+{"member_id": 3, "email": "ming@test.com", "password_hash": "$2b$12$oKaX5/UXXNQv5oEFWGWr2.ER.jL2DBs7w.ErhuglqmUH4.YMBeZie", "mobile": "0918222333", "nickname": "大明", "create_at": {"$date": "2019-01-07T10:39:38.000Z"}}
+{"member_id": 7, "email": "shin@test.com", "password_hash": "$2b$12$oKaX5/UXXNQv5oEFWGWr2.ER.jL2DBs7w.ErhuglqmUH4.YMBeZie", "mobile": "0918222555", "nickname": "小新", "create_at": {"$date": "2020-09-17T10:30:38.000Z"}}
+{"member_id": 8, "email": "mary@test.com", "password_hash": "$2b$12$oKaX5/UXXNQv5oEFWGWr2.ER.jL2DBs7w.ErhuglqmUH4.YMBeZie", "mobile": "0918222555", "nickname": "瑪麗亞", "create_at": {"$date": "2020-09-17T10:30:38.000Z"}}

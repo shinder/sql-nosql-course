@@ -1,0 +1,9 @@
+{"category_id": 1, "name": "程式設計", "parent_id": null}
+{"category_id": 2, "name": "繪圖軟體", "parent_id": null}
+{"category_id": 3, "name": "網際網路應用", "parent_id": null}
+{"category_id": 4, "name": "PHP", "parent_id": 1}
+{"category_id": 5, "name": "JavaScript", "parent_id": 1}
+{"category_id": 6, "name": "Illustrator", "parent_id": 2}
+{"category_id": 7, "name": "PhotoShop", "parent_id": 2}
+{"category_id": 8, "name": "Chrome", "parent_id": 3}
+{"category_id": 9, "name": "C++", "parent_id": 1}

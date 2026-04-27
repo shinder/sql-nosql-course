@@ -33,6 +33,16 @@ uv run ty check
 
 `pgsql/config.py` 的 `get_conninfo()` 是**所有**連線參數的唯一進入點，從專案根目錄的 `.env` 讀取後組成 conninfo 字串。新增任何需要連線的程式時，請呼叫此函式而非自行讀環境變數，避免設定散落多處。
 
+### psycopg 的 with-block 事務語意
+
+所有範例的事務邊界都建立在 psycopg 的預設行為上，理解這一點才能正確讀懂程式：
+
+- psycopg 預設 `autocommit=False`。
+- `with psycopg.connect(...) as conn:` 區塊**正常結束會 commit**，**拋例外會 rollback**。
+- `try_06_transaction.py` 是這個語意的示範；其他 CRUD demo（`try_02` ~ `try_04`）也都依賴這個機制隱式 commit。
+
+要明確控制事務時，改用 `try / except / finally` 自己呼叫 `conn.commit()` / `conn.rollback()`，不要混用 with-block 與手動 commit。
+
 ### 連線池為 process 級單例
 
 `pgsql/pool.py` 維護模組級的 `_pool` 變數。重點特性：
@@ -58,4 +68,5 @@ uv run ty check
 - 文件、註解、commit message 一律使用正體中文（沿用全域偏好）。
 - `pgsql/` 內所有可執行檔以 `python -m pgsql.<name>` 方式啟動，import 路徑要寫成 `from pgsql.config import ...`，而不是相對 import。
 - 教學用 demo 檔名格式為 `try_NN_<topic>.py`（如 `try_02_insert.py`）。`NN` 是教學順序編號，新增 demo 時延續這個慣例。函式庫檔（`config.py` / `pool.py` / `__init__.py`）不加數字前綴，因為會被其他檔 import。
-- `data/shin02-pgsql.sql` 是從 MariaDB / phpMyAdmin dump 轉換而來，檔頭註解列出了所有改寫規則，未來若再從 MySQL/MariaDB 匯入新資料表時請依相同規則轉換。
+- `data/shin02-pgsql.sql` 是從 MariaDB / phpMyAdmin dump 轉換而來，檔頭註解列出了所有改寫規則，未來若再從 MySQL/MariaDB 匯入新資料表時請依相同規則轉換。原始的 MariaDB dump 保留在 `data/shin02-mysql.sql` 供對照。
+- `pyproject.toml` 用的是 `psycopg[binary]` 而不是純 `psycopg`，這是刻意的：binary extra 會帶入預編譯的 libpq，避免 Windows 上找不到系統 libpq 的問題。改 dependency 時別把 `[binary]` 拿掉。
