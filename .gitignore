@@ -1,8 +1,18 @@
+# IDE / 編輯器
 .vscode
 .idea
+
+# Claude Code 本地檔（含對話 / settings）
 .claude
 
+# Python 虛擬環境與快取
 .venv
-
-.env
 __pycache__
+
+# 環境變數（含密碼，不可提交）
+.env
+
+# 作業系統 metadata
+.DS_Store
+._*
+Thumbs.db
