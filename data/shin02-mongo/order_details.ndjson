@@ -1,8 +1,0 @@
-{"od_id": 4, "order_id": 5, "product_id": 22, "price": 580, "quantity": 1}
-{"od_id": 5, "order_id": 5, "product_id": 17, "price": 620, "quantity": 2}
-{"od_id": 9, "order_id": 10, "product_id": 1, "price": 560, "quantity": 1}
-{"od_id": 10, "order_id": 10, "product_id": 2, "price": 420, "quantity": 1}
-{"od_id": 11, "order_id": 10, "product_id": 3, "price": 480, "quantity": 1}
-{"od_id": 12, "order_id": 11, "product_id": 5, "price": 690, "quantity": 2}
-{"od_id": 13, "order_id": 11, "product_id": 15, "price": 650, "quantity": 1}
-{"od_id": 14, "order_id": 11, "product_id": 3, "price": 480, "quantity": 2}
