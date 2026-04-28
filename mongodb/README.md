@@ -18,7 +18,9 @@ brew install mongodb-database-tools
 
 ## 匯入（批次）
 
-從專案根目錄執行。`--drop` 會在匯入前清空 collection，確保可重複執行不會留下舊資料：
+從專案根目錄執行。`--drop` 會在匯入前清空 collection，確保可重複執行不會留下舊資料。
+
+**macOS / Linux（bash / zsh）**
 
 ```bash
 for col in members address_book categories products orders; do
@@ -27,11 +29,45 @@ for col in members address_book categories products orders; do
 done
 ```
 
+**Windows PowerShell**
+
+換行續行字元是反引號 `` ` ``（不是 bash 的 `\`）；字串內的 `$col` 會自動展開。
+
+```powershell
+foreach ($col in 'members','address_book','categories','products','orders') {
+    mongoimport --db=shin03 --collection=$col --drop `
+                --file="data/shin03-mongo/$col.ndjson"
+}
+```
+
+**Windows cmd**
+
+cmd 的 `for` 沒有優雅的換行續行，整條寫一行；變數用 `%c`（寫進 `.bat` 檔要改成 `%%c`）。
+
+```cmd
+for %c in (members address_book categories products orders) do mongoimport --db=shin03 --collection=%c --drop --file=data\shin03-mongo\%c.ndjson
+```
+
 ## 匯入（單檔）
+
+**macOS / Linux**
 
 ```bash
 mongoimport --db=shin03 --collection=address_book --drop \
             --file=data/shin03-mongo/address_book.ndjson
+```
+
+**Windows PowerShell**
+
+```powershell
+mongoimport --db=shin03 --collection=address_book --drop `
+            --file="data/shin03-mongo/address_book.ndjson"
+```
+
+**Windows cmd**
+
+```cmd
+mongoimport --db=shin03 --collection=address_book --drop --file=data\shin03-mongo\address_book.ndjson
 ```
 
 ## 檔案與 collection 對應
