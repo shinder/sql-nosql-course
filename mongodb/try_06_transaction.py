@@ -110,6 +110,10 @@ def main() -> None:
         show_state(db, (id1, id2))
 
         # ---- 還原 ----
+        # 這裡刻意不用 transaction：每次 update_one 本身就是 atomic（MongoDB
+        # 對單一文件的寫入天生原子化），還原兩筆獨立資料不需要把它們綁成一個交易。
+        # transaction 是為了「跨文件一致性」存在 ── 像場景 B 那樣兩筆要嘛都成功、
+        # 要嘛都不動，才有意義。
         print("\n--- 還原 name 到原始值 ---")
         for ab_id, name in originals.items():
             db.address_book.update_one(

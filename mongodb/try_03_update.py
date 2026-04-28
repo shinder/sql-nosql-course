@@ -51,6 +51,14 @@ def main() -> None:
         #     $currentDate  把欄位設成 server 當前時間 ── 這就是取代 PG trigger 的關鍵
         #   return_document  : ReturnDocument.AFTER → 回傳更新後的文件
         #                       （預設是 BEFORE，會回傳更新前的 ── 容易踩坑）
+        #
+        # ⚠️ 注意：$currentDate 是 **update operator**，只能用在 update 語境
+        #   （update_one / update_many / find_one_and_update / bulk_write 的 update ops）。
+        #   insert_one / insert_many 收的是字面文件，把 $currentDate 寫進去會變成
+        #   一個叫 "$currentDate" 的詭異欄位，不會被 server 解讀為運算子。
+        #   想在 insert 時用 server-side 時間，要嘛改用 update_one + upsert=True
+        #   配 $setOnInsert，要嘛 client 端用 datetime.now(timezone.utc)
+        #   （見 try_02_insert.py 的作法）。
         after = db.address_book.find_one_and_update(
             {"ab_id": ab_id},
             {

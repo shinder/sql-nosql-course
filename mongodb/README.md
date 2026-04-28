@@ -94,11 +94,25 @@ uv run python -m mongodb.try_02_insert 50      # 指定筆數（上限 100）
 
 ### `try_03_update.py` — update operators 與 $currentDate
 
-依 `ab_id` 修改 `name`，用 `$currentDate` 在 driver 端主動寫入 `updated_at`，
+依 `ab_id` 修改 `name`，用 `$currentDate` 在 server 端寫入 `updated_at`，
 取代 PostgreSQL 的 BEFORE UPDATE trigger。
 
 特色：update operators (`$set` / `$currentDate` / `$inc` / `$push` ...) 只改指定欄位；
 `find_one_and_update + ReturnDocument.AFTER` 對應 SQL 的 `UPDATE ... RETURNING`。
+
+> ⚠️ **`$currentDate` 是 update operator，不能用在 insert**
+>
+> 它只在 update 語境生效（`update_one` / `update_many` / `find_one_and_update`
+> / `bulk_write` 的 update ops）。`insert_one` / `insert_many` 收的是字面文件，
+> 直接把 `$currentDate` 塞進去會變成一個叫 `"$currentDate"` 的欄位，
+> server 不會把它當運算子解讀。
+>
+> 想在 insert 時用 server-side 時間，有兩條路：
+>
+> 1. `update_one(filter, {"$setOnInsert": {...}, "$currentDate": {...}}, upsert=True)`
+>    ── 但每筆都要一次 round trip，沒有 `insert_many` 的批次優勢。
+> 2. client 端用 `datetime.now(timezone.utc)` 自己產生 tz-aware UTC
+>    ── 簡單、能配 `insert_many`，是 `try_02_insert.py` 採用的作法。
 
 ```bash
 uv run python -m mongodb.try_03_update 1 王小明

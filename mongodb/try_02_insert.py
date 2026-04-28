@@ -16,7 +16,7 @@
 
 import random
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 from faker import Faker
 from pymongo import MongoClient
@@ -45,13 +45,19 @@ def make_doc(ab_id: int) -> dict:
         "mobile": "09" + "".join(random.choices("0123456789", k=8)),
         # MongoDB 沒有純 DATE 型別，全部用 BSON Date（含時分秒）。
         # Faker 給 date，這裡 pad 成 datetime（午夜 0 點）。
+        # 這裡刻意用 naive datetime：birthday 的語意是「日期」而不是「某個瞬間」，
+        # 不需要時區資訊；PyMongo 會把它寫成 UTC 午夜，反推任何時區都還是同一天。
+        # 跟下面 created_at / updated_at 用 tz-aware UTC 形成對比 ──
+        # 「時刻」要 tz-aware，「日期」naive 反而較直觀。
         "birthday": datetime.combine(
             fake.date_of_birth(minimum_age=20, maximum_age=60),
             datetime.min.time(),
         ),
         "address": random.choice(CITIES),
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        # 用 tz-aware UTC，避免 PyMongo 把 naive datetime 當成 UTC 直接寫入，
+        # 造成「本地牆鐘時間被錯誤標記為 UTC」（差 8 小時）。
+        "created_at": datetime.now(timezone.utc),
+        "updated_at": datetime.now(timezone.utc),
     }
 
 

@@ -28,6 +28,7 @@ def main() -> None:
         #   .limit(N)   → LIMIT N
         # find() 回傳 cursor（lazy），真的迭代才會去 server 拿資料。
         cursor = db.address_book.find({}).sort("ab_id", DESCENDING).limit(5)
+        # mongosh: db.address_book.find({}).sort({ab_id: -1}).limit(5)
 
         # list(cursor) 一口氣抓完，類似 SQL 的 fetchall。
         # 資料量大時要小心，可改用 for doc in cursor: ... 逐筆處理。
@@ -42,6 +43,18 @@ def main() -> None:
         print(f"--- 第 {i} 筆 ---")
         # 注意：每份文件除了我們從 PG 帶過來的欄位，還會多一個 _id（ObjectId），
         # 那是 MongoDB 自動生成的主鍵；ab_id 是從 PG 沿用的整數欄位。
+        #
+        # ⚠️ 日期輸出沒有時區轉換：
+        #   BSON Date 在 server 端是 UTC 毫秒。PyMongo 預設 (tz_aware=False)
+        #   把它解成 **naive datetime**（沒有 tzinfo），值是 UTC 牆鐘時間。
+        #   直接 print 看到的數字就是 UTC，**不會自動換成本地時區**，
+        #   也不會印 'Z' 或 '+00:00'，所以乍看會以為是本地時間 ── 容易踩坑。
+        #
+        #   想要本地時間，有兩條路：
+        #     1. 建 MongoClient 時用 tz_aware=True 取得 aware UTC datetime，
+        #        再 .astimezone(ZoneInfo("Asia/Taipei")) 轉本地。
+        #     2. 顯示時自己處理：val.replace(tzinfo=timezone.utc).astimezone()。
+        #   demo 為了直觀對應「資料庫實際存什麼」，刻意不轉時區。
         for col, val in doc.items():
             print(f"  {col}: {val}")
 
