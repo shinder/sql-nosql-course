@@ -59,6 +59,104 @@ NDJSON 內的日期 / 時間欄位用 [MongoDB Extended JSON](https://www.mongod
 `mongoimport` 會自動把它轉成 BSON `Date` 而不是字串，後續可以用
 `$gte` / `$lte` 做日期區間查詢。
 
+## 範例程式
+
+`mongodb/` 內的 `try_NN_*.py` 範例檔名數字代表「建議學習順序」，由基本到進階。
+每支腳本都對應一支 `pgsql/try_NN_*.py`，docstring 內標出兩個 DB 的關鍵差異。
+執行任何範例前，請先用上面步驟把 NDJSON 匯入 MongoDB。
+
+### `try_00_connect.py` — 連線健康檢查
+
+連線、印出 MongoDB 版本與 `shin03` 內現有的 collection 清單。
+
+```bash
+uv run python -m mongodb.try_00_connect
+```
+
+### `try_01_select.py` — find 查詢
+
+`address_book.find({}).sort("ab_id", -1).limit(5)` 取最後 5 筆。
+特色：查詢條件是 dict 不是 SQL 字串；driver 直接回傳 dict（不用 `dict_row`）。
+
+```bash
+uv run python -m mongodb.try_01_select
+```
+
+### `try_02_insert.py` — insert_many 批次新增
+
+用 Faker 產生 N 筆假資料寫入 `address_book`。
+特色：直接塞 dict、schemaless（無需 ALTER TABLE）；`_id` 自動生成 `ObjectId`。
+
+```bash
+uv run python -m mongodb.try_02_insert         # 預設 5 筆
+uv run python -m mongodb.try_02_insert 50      # 指定筆數（上限 100）
+```
+
+### `try_03_update.py` — update operators 與 $currentDate
+
+依 `ab_id` 修改 `name`，用 `$currentDate` 在 driver 端主動寫入 `updated_at`，
+取代 PostgreSQL 的 BEFORE UPDATE trigger。
+
+特色：update operators (`$set` / `$currentDate` / `$inc` / `$push` ...) 只改指定欄位；
+`find_one_and_update + ReturnDocument.AFTER` 對應 SQL 的 `UPDATE ... RETURNING`。
+
+```bash
+uv run python -m mongodb.try_03_update 1 王小明
+```
+
+### `try_04_delete.py` — find_one_and_delete
+
+依 `ab_id` 刪除一筆並印出被刪文件的全部欄位。
+特色：原子完成「找 → 刪 → 回傳」，對應 SQL 的 `DELETE ... RETURNING *`。
+
+```bash
+uv run python -m mongodb.try_04_delete 1
+```
+
+### `try_05_join.py` — embedded vs $lookup（核心對比）
+
+三段示範：
+
+1. **embedded array**：直接讀 `orders.details` 子陣列，根本不用 JOIN
+2. **$lookup**：跨集合關聯，預設行為相當於 LEFT JOIN（會員無訂單也會出現）
+3. **多 stage pipeline**：4 表 JOIN 對應 `$lookup` × 2 + `$unwind` × 2 + `$project`
+
+```bash
+uv run python -m mongodb.try_05_join
+```
+
+### `try_06_transaction.py` — multi-document transaction
+
+⚠️ 需要 **replica set**，standalone mongod 跑會在第一個 update 抛 `OperationFailure`
+（腳本會抓住並優雅退出）。
+
+特色：`client.start_session()` + `session.start_transaction()`，
+所有要參與交易的操作都得帶 `session=session`。註解內解釋為何 MongoDB
+因為 embedded document 設計常常根本不需要 transaction。
+
+```bash
+uv run python -m mongodb.try_06_transaction
+```
+
+啟動單節點 replica set 的快速指引：
+
+```bash
+mongod --dbpath /your/data/dir --replSet rs0
+mongosh --eval 'rs.initiate()'
+```
+
+### `try_07_pool.py` — 連線池
+
+8 個 thread 共用一個 `MongoClient(maxPoolSize=5)`，從 server 端 `serverStatus.connections`
+觀察池的實際使用情況。
+
+特色：🌟 **MongoClient 本身就是連線池**，不需要 wrapper（pgsql 範例用 psycopg-pool 包了一層）。
+應用層不直接持有連線，每筆操作執行時短暫借 socket、結束立刻歸還。
+
+```bash
+uv run python -m mongodb.try_07_pool
+```
+
 ## 驗證
 
 ```bash
