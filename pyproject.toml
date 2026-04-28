@@ -9,6 +9,7 @@ dependencies = [
     "psycopg[binary]>=3.3.3",
     "psycopg-pool>=3.3.0",
     "python-dotenv>=1.2.2",
+    "pymongo>=4.17.0",
 ]
 
 [tool.ty.environment]
